@@ -1,0 +1,34 @@
+{
+	# Dipakai di belakang reverse proxy (Traefik/Dokploy): percayai proxy privat agar {client_ip} = IP klien asli.
+	servers {
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+	}
+}
+
+# Standalone: SITE_ADDRESS=loyalty.example.com (Caddy mengurus HTTPS Let's Encrypt).
+# Dokploy/Traefik: SITE_ADDRESS=:80 (TLS diakhiri Traefik, Caddy hanya HTTP).
+{$SITE_ADDRESS:localhost} {
+	encode gzip zstd
+
+	# API menambahkan header keamanannya sendiri; jangan digandakan di sini.
+	handle /api/* {
+		reverse_proxy api:8080 {
+			# Timpa (bukan tambahkan) supaya klien tidak bisa memalsukan IP untuk melewati rate limit.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+
+	handle {
+		header {
+			X-Content-Type-Options nosniff
+			X-Frame-Options DENY
+			Referrer-Policy strict-origin-when-cross-origin
+			Strict-Transport-Security "max-age=31536000"
+			Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+		}
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

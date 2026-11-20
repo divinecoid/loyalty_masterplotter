@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: loyalty
+      POSTGRES_PASSWORD: loyalty
+      POSTGRES_DB: loyalty
+    ports:
+      - "5433:5432"   # 5433 agar tidak bentrok dengan Postgres lokal di 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loyalty"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgres://loyalty:loyalty@db:5432/loyalty?sslmode=disable
+      PUBLIC_URL: http://localhost:5173
+      CORS_ORIGINS: http://localhost:5173
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-dev-only-change-me}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@masterplotter.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
