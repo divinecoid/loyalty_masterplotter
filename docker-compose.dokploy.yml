@@ -1,6 +1,7 @@
 # Untuk Dokploy (Traefik yang mengurus domain + HTTPS). Tidak ada port yang dipublikasikan ke host.
 # Di Dokploy: Compose > Domains: host = domain kamu, service = web, port = 80, HTTPS = on (Let's Encrypt).
 # Variabel (tab Environment): DOMAIN, DB_PASSWORD, JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, FONNTE_TOKEN
+# Mode IP:port (uji): tambah PUBLIC_URL=http://IP:8088, PRODUCTION=false, COOKIE_SECURE=false (DOMAIN boleh kosong).
 services:
   db:
     image: postgres:17-alpine
@@ -20,12 +21,12 @@ services:
     build: ./backend
     restart: unless-stopped
     environment:
-      PRODUCTION: "true"
+      PRODUCTION: ${PRODUCTION:-true}
       TRUST_PROXY: "true"
-      COOKIE_SECURE: "true"
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
       DATABASE_URL: postgres://loyalty:${DB_PASSWORD}@db:5432/loyalty?sslmode=disable
-      PUBLIC_URL: https://${DOMAIN:?isi DOMAIN}
-      CORS_ORIGINS: https://${DOMAIN}
+      PUBLIC_URL: ${PUBLIC_URL:-https://${DOMAIN:-}}
+      CORS_ORIGINS: ${PUBLIC_URL:-https://${DOMAIN:-}}
       JWT_SECRET: ${JWT_SECRET:?isi JWT_SECRET (min 32 karakter acak)}
       FONNTE_TOKEN: ${FONNTE_TOKEN:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
@@ -39,6 +40,9 @@ services:
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ":80"
+    # Mode uji lewat IP:port (tanpa domain/HTTPS). Hapus baris ini saat sudah pakai domain + Traefik.
+    ports:
+      - "${WEB_PORT:-8088}:80"
     depends_on:
       - api
     networks:
