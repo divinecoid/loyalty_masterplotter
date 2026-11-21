@@ -31,6 +31,7 @@ services:
       FONNTE_TOKEN: ${FONNTE_TOKEN:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_SYNC: ${ADMIN_SYNC:-false}
     depends_on:
       db:
         condition: service_healthy

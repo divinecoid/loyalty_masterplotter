@@ -32,6 +32,8 @@ type Config struct {
 	// Bootstrap admin pertama (hanya dipakai jika tabel admins masih kosong)
 	AdminEmail    string
 	AdminPassword string
+	// AdminSync: saat start, buat/perbarui admin owner dari ADMIN_EMAIL+ADMIN_PASSWORD (untuk reset). Matikan lagi setelah dipakai.
+	AdminSync bool
 }
 
 func Load() Config {
@@ -52,6 +54,7 @@ func Load() Config {
 		RedeemRequiresVerified: envBool("REDEEM_REQUIRES_VERIFIED", true),
 		AdminEmail:             os.Getenv("ADMIN_EMAIL"),
 		AdminPassword:          os.Getenv("ADMIN_PASSWORD"),
+		AdminSync:              envBool("ADMIN_SYNC", false),
 	}
 }
 

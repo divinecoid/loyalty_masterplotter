@@ -307,3 +307,12 @@ func affected(n int64, err error) error {
 	}
 	return nil
 }
+
+// UpsertAdmin membuat admin atau mengganti password_hash (dan role) bila email sudah ada.
+func (s *Store) UpsertAdmin(ctx context.Context, email, hash, role string) (created bool, err error) {
+	err = s.pool.QueryRow(ctx,
+		`INSERT INTO admins(email,password_hash,role) VALUES($1,$2,$3)
+		 ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, role=EXCLUDED.role
+		 RETURNING (xmax = 0)`, email, hash, role).Scan(&created)
+	return
+}

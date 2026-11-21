@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -90,4 +91,16 @@ func SeedAdmin(ctx context.Context, st *store.Store, email, password string) (bo
 	}
 	_, err = st.CreateAdmin(ctx, strings.ToLower(email), h, "owner")
 	return err == nil, err
+}
+
+// SyncAdmin membuat atau memperbarui admin owner dari konfigurasi (ADMIN_SYNC=true). created=false berarti password diganti.
+func SyncAdmin(ctx context.Context, st *store.Store, email, password string) (created bool, err error) {
+	if email == "" || password == "" {
+		return false, errors.New("ADMIN_SYNC butuh ADMIN_EMAIL dan ADMIN_PASSWORD")
+	}
+	h, err := auth.HashPassword(password)
+	if err != nil {
+		return false, err
+	}
+	return st.UpsertAdmin(ctx, strings.ToLower(email), h, "owner")
 }

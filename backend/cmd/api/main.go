@@ -39,7 +39,13 @@ func main() {
 	}
 
 	st := store.New(pool)
-	if created, err := httpapi.SeedAdmin(ctx, st, cfg.AdminEmail, cfg.AdminPassword); err != nil {
+	if cfg.AdminSync {
+		created, err := httpapi.SyncAdmin(ctx, st, cfg.AdminEmail, cfg.AdminPassword)
+		if err != nil {
+			log.Fatal().Err(err).Msg("sync admin")
+		}
+		log.Warn().Str("email", cfg.AdminEmail).Bool("created", created).Msg("ADMIN_SYNC aktif: admin owner disinkronkan dari env — matikan ADMIN_SYNC dan hapus ADMIN_PASSWORD setelah ini")
+	} else if created, err := httpapi.SeedAdmin(ctx, st, cfg.AdminEmail, cfg.AdminPassword); err != nil {
 		log.Fatal().Err(err).Msg("seed admin")
 	} else if created {
 		log.Info().Str("email", cfg.AdminEmail).Msg("admin owner pertama dibuat")
