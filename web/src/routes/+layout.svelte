@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import favicon from '#lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
 
@@ -8,14 +7,15 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/png" href="/icon.png" />
+	<link rel="apple-touch-icon" href="/icon.png" />
 	<title>Master Plotter Loyalty</title>
 	<meta name="theme-color" content="#112f60" />
 </svelte:head>
 
 <header class="border-b-4 border-brand-yellow bg-navy text-white">
 	<div class="mx-auto flex h-14 max-w-5xl items-center px-4">
-		<span class="text-lg font-bold tracking-tight">MASTER <span class="text-brand-yellow">PLOTTER</span></span>
+		<a href="/" class="flex items-center"><img src="/logo.png" alt="Master Plotter" width="623" height="194" class="h-9 w-auto" /></a>
 		<span class="ml-3 text-sm text-mist">Loyalty</span>
 		{#if !page.url.pathname.startsWith('/admin')}
 			<nav class="ml-auto flex gap-1 text-sm">
